@@ -27,7 +27,7 @@ var (
 
 func listenForInterrupt(q chan struct{}) {
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Kill, os.Interrupt)
+	signal.Notify(signals, syscall.SIGTERM, os.Interrupt)
 	sig := <-signals
 	fmt.Fprintf(os.Stderr, "received signal %s\n", sig)
 	close(q)

@@ -103,7 +103,7 @@ type consumeArgs struct {
 
 func parseOffset(str string) (offset, error) {
 	result := offset{}
-	re := regexp.MustCompile("(oldest|newest|resume)?(-|\\+)?(\\d+)?")
+	re := regexp.MustCompile(`(oldest|newest|resume)?(-|\+)?(\d+)?`)
 	matches := re.FindAllStringSubmatch(str, -1)
 
 	if len(matches) == 0 || len(matches[0]) < 4 {
@@ -155,8 +155,8 @@ func parseOffsets(str string) (map[int32]interval, error) {
 	}
 
 	result := map[int32]interval{}
+	re := regexp.MustCompile(`(all|\d+)?=?([^:]+)?:?(.+)?`)
 	for _, partitionInfo := range strings.Split(str, ",") {
-		re := regexp.MustCompile("(all|\\d+)?=?([^:]+)?:?(.+)?")
 		matches := re.FindAllStringSubmatch(strings.TrimSpace(partitionInfo), -1)
 		if len(matches) != 1 || len(matches[0]) < 3 {
 			return result, fmt.Errorf("Invalid partition info [%v]", partitionInfo)
@@ -389,7 +389,7 @@ func (cmd *consumeCmd) consumePartition(out chan printContext, partition int32) 
 	)
 
 	if offsets, ok = cmd.offsets[partition]; !ok {
-		offsets, ok = cmd.offsets[-1]
+		offsets = cmd.offsets[-1]
 	}
 
 	if start, err = cmd.resolveOffset(offsets.start, partition); err != nil {
